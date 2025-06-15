@@ -1,13 +1,9 @@
 import SplitLayout from './components/SplitLayout'
+import ReferencePanel from './components/ReferencePanel'
 import './App.css'
 
 function App() {
-  const leftContent = (
-    <div>
-      <h2>お手本表示パネル</h2>
-      <p>ここにお手本画像が表示されますの</p>
-    </div>
-  )
+  const leftContent = <ReferencePanel />
 
   const rightContent = (
     <div>

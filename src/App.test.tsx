@@ -10,9 +10,14 @@ describe('App', () => {
     expect(screen.getByRole('region', { name: '描画エリア' })).toBeInTheDocument()
   })
 
-  it('renders placeholder content in panels', () => {
+  it('renders reference panel in left area', () => {
     render(<App />)
-    expect(screen.getByText('お手本表示パネル')).toBeInTheDocument()
+    expect(screen.getByText('グリッド設定')).toBeInTheDocument()
+    expect(screen.getByText('画像を選択')).toBeInTheDocument()
+  })
+
+  it('renders placeholder in drawing area', () => {
+    render(<App />)
     expect(screen.getByText('描画パネル')).toBeInTheDocument()
   })
 })
