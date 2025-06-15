@@ -1,0 +1,79 @@
+.pen-controls {
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+}
+
+.pen-controls h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.pen-controls__section {
+  margin-bottom: 1rem;
+}
+
+.pen-controls__section:last-child {
+  margin-bottom: 0;
+}
+
+.pen-controls__control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.pen-controls__control-group label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.pen-controls__size-value {
+  color: #646cff;
+  font-weight: 600;
+}
+
+.pen-controls__size-input {
+  width: 80px;
+  padding: 0.25rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.pen-controls__presets {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pen-controls__preset-button {
+  padding: 0.25rem 0.75rem;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.pen-controls__preset-button:hover {
+  background-color: #f0f0f0;
+}
+
+.pen-controls__preset-button--active {
+  background-color: #646cff;
+  color: white;
+  border-color: #646cff;
+}
+
+.pen-controls__color-input {
+  width: 60px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+}

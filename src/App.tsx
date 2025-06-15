@@ -1,16 +1,11 @@
 import SplitLayout from './components/SplitLayout'
 import ReferencePanel from './components/ReferencePanel'
+import DrawingPanel from './components/DrawingPanel'
 import './App.css'
 
 function App() {
   const leftContent = <ReferencePanel />
-
-  const rightContent = (
-    <div>
-      <h2>描画パネル</h2>
-      <p>ここで模写練習を行いますの</p>
-    </div>
-  )
+  const rightContent = <DrawingPanel />
 
   return <SplitLayout leftContent={leftContent} rightContent={rightContent} />
 }

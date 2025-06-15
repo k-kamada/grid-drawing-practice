@@ -1,0 +1,46 @@
+.drawing-canvas {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 1rem;
+}
+
+.drawing-canvas__controls {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.drawing-canvas__clear-button {
+  padding: 0.5rem 1rem;
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+}
+
+.drawing-canvas__clear-button:hover {
+  background-color: #ff5252;
+}
+
+.drawing-canvas__area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.drawing-canvas__canvas {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: crosshair;
+  background-color: white;
+  max-width: 100%;
+  max-height: 100%;
+}

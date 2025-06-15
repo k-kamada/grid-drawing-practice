@@ -1,0 +1,15 @@
+.drawing-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 1rem;
+}
+
+.drawing-panel__controls {
+  flex-shrink: 0;
+}
+
+.drawing-panel__canvas {
+  flex: 1;
+  min-height: 0;
+}

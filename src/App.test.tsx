@@ -16,8 +16,9 @@ describe('App', () => {
     expect(screen.getByText('画像を選択')).toBeInTheDocument()
   })
 
-  it('renders placeholder in drawing area', () => {
+  it('renders drawing panel in right area', () => {
     render(<App />)
-    expect(screen.getByText('描画パネル')).toBeInTheDocument()
+    expect(screen.getByText('ペン設定')).toBeInTheDocument()
+    expect(screen.getByText('クリア')).toBeInTheDocument()
   })
 })
