@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react'
+import GridOverlay from './GridOverlay'
 import './ImageDisplay.css'
 
 interface ImageDisplayProps {
@@ -6,13 +7,23 @@ interface ImageDisplayProps {
   scrollPosition?: { x: number, y: number }
   onScrollChange?: (position: { x: number, y: number }) => void
   onImageDimensionsChange?: (size: { width: number, height: number } | null) => void
+  gridVisible?: boolean
+  gridSize?: number
+  gridLineWidth?: number
+  gridColor?: string
+  imageSize?: { width: number, height: number } | null
 }
 
 const ImageDisplay: React.FC<ImageDisplayProps> = ({ 
   imageSrc, 
   scrollPosition = { x: 0, y: 0 }, 
   onScrollChange,
-  onImageDimensionsChange
+  onImageDimensionsChange,
+  gridVisible = false,
+  gridSize = 100,
+  gridLineWidth = 1,
+  gridColor = '#000000',
+  imageSize
 }) => {
   const hasValidImage = imageSrc && imageSrc.trim() !== ''
   const containerRef = useRef<HTMLDivElement>(null)
@@ -59,7 +70,8 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({
       style={{
         overflow: 'auto',
         width: '100%',
-        height: '100%'
+        height: '100%',
+        position: 'relative'
       }}
     >
       {hasValidImage ? (
@@ -78,6 +90,15 @@ const ImageDisplay: React.FC<ImageDisplayProps> = ({
         <div className="image-display__placeholder">
           <p>画像が選択されていません</p>
         </div>
+      )}
+      {gridVisible && (
+        <GridOverlay
+          visible={gridVisible}
+          gridSize={gridSize}
+          lineWidth={gridLineWidth}
+          color={gridColor}
+          imageSize={imageSize}
+        />
       )}
     </div>
   )

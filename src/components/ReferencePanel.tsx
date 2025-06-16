@@ -91,25 +91,12 @@ const ReferencePanel: React.FC<ReferencePanelProps> = ({
               scrollPosition={scrollPosition}
               onScrollChange={onScrollChange}
               onImageDimensionsChange={handleImageDimensionsChange}
+              gridVisible={gridVisible}
+              gridSize={gridSize}
+              gridLineWidth={gridLineWidth}
+              gridColor={gridColor}
+              imageSize={imageSize}
             />
-            {gridVisible && (
-              <div style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '100%',
-                pointerEvents: 'none'
-              }}>
-                <GridOverlay
-                  visible={gridVisible}
-                  gridSize={gridSize}
-                  lineWidth={gridLineWidth}
-                  color={gridColor}
-                  imageSize={imageSize}
-                />
-              </div>
-            )}
           </div>
         ) : (
           <ImageUpload onImageSelect={handleImageSelect} />
