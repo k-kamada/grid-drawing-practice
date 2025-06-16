@@ -1,30 +1,30 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react'
+import React, { useRef, useEffect, useState, useCallback, forwardRef, useImperativeHandle } from 'react'
 import GridOverlay from './GridOverlay'
 import './DrawingCanvas.css'
 
 interface DrawingCanvasProps {
   penSize: number
   penColor: string
-  onClear: () => void
   gridVisible: boolean
   gridSize: number
   gridLineWidth: number
   gridColor: string
 }
 
-const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
+const DrawingCanvas = forwardRef<HTMLCanvasElement, DrawingCanvasProps>(({
   penSize,
   penColor,
-  onClear,
   gridVisible,
   gridSize,
   gridLineWidth,
   gridColor
-}) => {
+}, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 })
+
+  useImperativeHandle(ref, () => canvasRef.current!, []);
 
   // コンテナサイズに応じてキャンバスサイズを調整
   useEffect(() => {
@@ -107,27 +107,9 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
     setIsDrawing(false)
   }, [])
 
-  const clearCanvas = useCallback(() => {
-    const canvas = canvasRef.current
-    const context = canvas?.getContext('2d')
-    
-    if (!context || !canvas) return
-
-    context.clearRect(0, 0, canvas.width, canvas.height)
-    onClear()
-  }, [onClear])
 
   return (
     <div className="drawing-canvas">
-      <div className="drawing-canvas__controls">
-        <button
-          type="button"
-          onClick={clearCanvas}
-          className="drawing-canvas__clear-button"
-        >
-          クリア
-        </button>
-      </div>
       <div className="drawing-canvas__area">
         <div ref={containerRef} className="drawing-canvas__container">
           <canvas
@@ -154,6 +136,8 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
       </div>
     </div>
   )
-}
+})
+
+DrawingCanvas.displayName = 'DrawingCanvas'
 
 export default DrawingCanvas

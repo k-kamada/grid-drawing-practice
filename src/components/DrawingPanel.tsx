@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import PenControls from './PenControls'
 import DrawingCanvas from './DrawingCanvas'
 import './DrawingPanel.css'
@@ -18,6 +18,7 @@ const DrawingPanel: React.FC<DrawingPanelProps> = ({
 }) => {
   const [penSize, setPenSize] = useState(1)
   const [penColor, setPenColor] = useState('#000000')
+  const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const handlePenSizeChange = (size: number) => {
     setPenSize(size)
@@ -28,7 +29,12 @@ const DrawingPanel: React.FC<DrawingPanelProps> = ({
   }
 
   const handleClear = () => {
-    // Clear event handled by DrawingCanvas
+    const canvas = canvasRef.current
+    const context = canvas?.getContext('2d')
+    
+    if (!context || !canvas) return
+
+    context.clearRect(0, 0, canvas.width, canvas.height)
   }
 
   return (
@@ -39,17 +45,18 @@ const DrawingPanel: React.FC<DrawingPanelProps> = ({
           penColor={penColor}
           onPenSizeChange={handlePenSizeChange}
           onPenColorChange={handlePenColorChange}
+          onClear={handleClear}
         />
       </div>
       <div className="drawing-panel__canvas">
         <DrawingCanvas
           penSize={penSize}
           penColor={penColor}
-          onClear={handleClear}
           gridVisible={gridVisible}
           gridSize={gridSize}
           gridLineWidth={gridLineWidth}
           gridColor={gridColor}
+          ref={canvasRef}
         />
       </div>
     </div>

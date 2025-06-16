@@ -6,10 +6,9 @@
 
 .drawing-panel__controls {
   flex-shrink: 0;
-  height: 120px; /* ReferencePanelと同じ固定高さ */
+  height: 190px; /* 個別角丸スタイルに合わせて20px増加 */
   padding: 1rem;
   border-bottom: 1px solid #e5e5e5;
-  overflow-y: auto;
 }
 
 .drawing-panel__canvas {

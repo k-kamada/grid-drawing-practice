@@ -6,10 +6,12 @@
 
 .reference-panel__controls {
   flex-shrink: 0;
-  height: 120px; /* 固定高さで統一 */
+  height: 190px; /* 個別角丸スタイルに合わせて20px増加 */
   padding: 1rem;
   border-bottom: 1px solid #e5e5e5;
-  overflow-y: auto;
+}
+
+.reference-panel__grid-controls {
 }
 
 .reference-panel__grid-controls h3 {

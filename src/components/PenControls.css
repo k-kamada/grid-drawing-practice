@@ -1,9 +1,7 @@
 .pen-controls {
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  border: 1px solid #e5e5e5;
-  padding: 0.5rem;
-  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
 }
 
 .pen-controls h3 {
@@ -12,12 +10,33 @@
   font-weight: 600;
 }
 
-.pen-controls__section {
-  margin-bottom: 1rem;
+.pen-controls__layout {
+  display: flex;
+  gap: 1.25rem; /* 20px統一スペーシング - 新要素追加時も同じ値を使用 */
+  align-items: flex-start;
+  justify-content: flex-start; /* 左から順番に配置 */
+  flex-wrap: wrap; /* 要素が多くなった場合の折り返し対応 */
 }
 
-.pen-controls__section:last-child {
-  margin-bottom: 0;
+.pen-controls__size-section {
+  flex: 0 1 auto; /* 内容に応じたサイズで、縮小可能 */
+  min-width: 0; /* flexboxで子要素がはみ出ないようにする */
+  max-width: 60%; /* 最大幅を制限してバランス調整 */
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+  padding: 0.5rem;
+}
+
+.pen-controls__color-section {
+  flex: 0 0 auto; /* サイズ固定 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+  padding: 0.5rem;
 }
 
 .pen-controls__control-group {
@@ -48,16 +67,18 @@
 .pen-controls__presets {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap; /* 必要に応じて折り返し */
 }
 
 .pen-controls__preset-button {
-  padding: 0.25rem 0.75rem;
+  padding: 0.25rem 0.5rem;
   background-color: white;
   border: 1px solid #ccc;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.8rem;
   transition: all 0.3s ease;
+  flex: 0 0 auto; /* サイズ固定 */
 }
 
 .pen-controls__preset-button:hover {
@@ -77,4 +98,22 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.pen-controls__clear-button {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.3s ease;
+}
+
+.pen-controls__clear-button:hover {
+  background-color: #cc3333;
 }
