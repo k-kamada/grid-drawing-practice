@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useState, useCallback, forwardRef, useImperativeHandle } from 'react'
 import GridOverlay from './GridOverlay'
 import { useDrawingStrokes } from '../hooks/useDrawingStrokes'
-import type { DrawingPoint } from '../types/drawing'
+import { useVirtualCanvas } from '../hooks/useVirtualCanvas'
+import type { DrawingPoint, Size } from '../types/drawing'
 import './DrawingCanvas.css'
 
 interface DrawingCanvasProps {
@@ -11,6 +12,7 @@ interface DrawingCanvasProps {
   gridSize: number
   gridLineWidth: number
   gridColor: string
+  imageSize?: Size | null // お手本画像サイズ（仮想キャンバスサイズ計算用）
   onClear?: () => void
 }
 
@@ -26,12 +28,24 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
   gridSize,
   gridLineWidth,
   gridColor,
+  imageSize,
   onClear
 }, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
-  const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 })
+
+  // 仮想キャンバス管理フック
+  const {
+    virtualSize,
+    needsScroll,
+    updateViewportSize,
+    updateImageSize
+  } = useVirtualCanvas({
+    imageSize,
+    defaultSize: { width: 1200, height: 800 },
+    minSize: { width: 800, height: 600 }
+  })
 
   // ストローク履歴管理フック
   const {
@@ -57,19 +71,19 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
     clearCanvas
   }), [clearCanvas]);
 
-  // コンテナサイズに応じてキャンバスサイズを調整
+  // コンテナサイズ監視と仮想キャンバス更新
   useEffect(() => {
-    const updateCanvasSize = () => {
+    const updateViewport = () => {
       const container = containerRef.current
       if (!container) return
 
       const { clientWidth, clientHeight } = container
-      setCanvasSize({ width: clientWidth, height: clientHeight })
+      updateViewportSize({ width: clientWidth, height: clientHeight })
     }
 
-    updateCanvasSize()
+    updateViewport()
     
-    const resizeObserver = new ResizeObserver(updateCanvasSize)
+    const resizeObserver = new ResizeObserver(updateViewport)
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current)
     }
@@ -77,16 +91,23 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
     return () => {
       resizeObserver.disconnect()
     }
-  }, [])
+  }, [updateViewportSize])
 
-  // キャンバスサイズ変更時にストロークを再描画
+  // 仮想キャンバスサイズ変更時にストロークを再描画
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
 
-    // キャンバスサイズ変更後に全ストロークを再描画
+    // 仮想キャンバスサイズ変更後に全ストロークを再描画
     redrawAllStrokes(canvas)
-  }, [canvasSize, redrawAllStrokes])
+  }, [virtualSize, redrawAllStrokes])
+
+  // お手本画像サイズ変更時の仮想キャンバス更新
+  useEffect(() => {
+    if (imageSize) {
+      updateImageSize(imageSize)
+    }
+  }, [imageSize, updateImageSize])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -107,15 +128,16 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
 
     const rect = canvas.getBoundingClientRect()
     
-    // Canvas内部座標系と表示座標系のスケール比を計算
-    const scaleX = canvas.width / rect.width
-    const scaleY = canvas.height / rect.height
+    // 仮想キャンバス座標系への変換
+    // 表示座標 → 仮想キャンバス座標
+    const virtualX = (event.clientX - rect.left) * (virtualSize.width / rect.width)
+    const virtualY = (event.clientY - rect.top) * (virtualSize.height / rect.height)
     
     return {
-      x: (event.clientX - rect.left) * scaleX,
-      y: (event.clientY - rect.top) * scaleY
+      x: virtualX,
+      y: virtualY
     }
-  }, [])
+  }, [virtualSize])
 
   const startDrawing = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
     const position = getMousePosition(event)
@@ -162,12 +184,30 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
 
   return (
     <div className="drawing-canvas">
-      <div className="drawing-canvas__area">
-        <div ref={containerRef} className="drawing-canvas__container">
+      <div 
+        ref={containerRef} 
+        className="drawing-canvas__viewport"
+        style={{
+          width: '100%',
+          height: '100%',
+          overflow: needsScroll ? 'auto' : 'hidden',
+          position: 'relative'
+        }}
+      >
+        <div 
+          className="drawing-canvas__virtual-container"
+          style={{
+            width: virtualSize.width,
+            height: virtualSize.height,
+            minWidth: virtualSize.width,
+            minHeight: virtualSize.height,
+            position: 'relative'
+          }}
+        >
           <canvas
             ref={canvasRef}
-            width={canvasSize.width}
-            height={canvasSize.height}
+            width={virtualSize.width}
+            height={virtualSize.height}
             className="drawing-canvas__canvas"
             onMouseDown={startDrawing}
             onMouseMove={draw}
@@ -175,6 +215,11 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
             onMouseLeave={stopDrawing}
             role="img"
             aria-label="描画キャンバス"
+            style={{
+              display: 'block',
+              width: virtualSize.width,
+              height: virtualSize.height
+            }}
           />
           {gridVisible && (
             <GridOverlay

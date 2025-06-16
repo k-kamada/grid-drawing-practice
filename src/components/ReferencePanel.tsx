@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import ImageUpload from './ImageUpload'
 import ImageDisplay from './ImageDisplay'
 import GridOverlay from './GridOverlay'
+import type { Size } from '../types/drawing'
 import './ReferencePanel.css'
 
 interface ReferencePanelProps {
@@ -11,6 +12,7 @@ interface ReferencePanelProps {
   gridColor: string
   onGridVisibleChange: (visible: boolean) => void
   onGridSizeChange: (size: number) => void
+  onImageDimensionsChange: (size: Size | null) => void
 }
 
 const ReferencePanel: React.FC<ReferencePanelProps> = ({
@@ -20,12 +22,26 @@ const ReferencePanel: React.FC<ReferencePanelProps> = ({
   gridColor,
   onGridVisibleChange,
   onGridSizeChange,
+  onImageDimensionsChange,
 }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
   const handleImageSelect = (file: File) => {
     const imageUrl = URL.createObjectURL(file)
     setSelectedImage(imageUrl)
+    
+    // 画像サイズを取得してコールバックで通知
+    const img = new Image()
+    img.onload = () => {
+      onImageDimensionsChange({
+        width: img.naturalWidth,
+        height: img.naturalHeight
+      })
+    }
+    img.onerror = () => {
+      onImageDimensionsChange(null)
+    }
+    img.src = imageUrl
   }
 
   const handleGridToggle = (event: React.ChangeEvent<HTMLInputElement>) => {

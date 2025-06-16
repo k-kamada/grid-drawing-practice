@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react'
 import PenControls from './PenControls'
 import DrawingCanvas, { type DrawingCanvasRef } from './DrawingCanvas'
+import type { Size } from '../types/drawing'
 import './DrawingPanel.css'
 
 interface DrawingPanelProps {
@@ -8,6 +9,7 @@ interface DrawingPanelProps {
   gridSize: number
   gridLineWidth: number
   gridColor: string
+  imageSize?: Size | null
 }
 
 const DrawingPanel: React.FC<DrawingPanelProps> = ({
@@ -15,6 +17,7 @@ const DrawingPanel: React.FC<DrawingPanelProps> = ({
   gridSize,
   gridLineWidth,
   gridColor,
+  imageSize,
 }) => {
   const [penSize, setPenSize] = useState(1)
   const [penColor, setPenColor] = useState('#000000')
@@ -51,6 +54,7 @@ const DrawingPanel: React.FC<DrawingPanelProps> = ({
           gridSize={gridSize}
           gridLineWidth={gridLineWidth}
           gridColor={gridColor}
+          imageSize={imageSize}
           ref={canvasRef}
         />
       </div>

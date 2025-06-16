@@ -321,6 +321,63 @@ interface CanvasState {
 - ✅ **テスト50件全通過維持**: 品質保証継続
 - ✅ **ビルド成功**: TypeScriptエラー完全解決
 
+### Phase 2: 仮想キャンバス + スクロール対応実装完了
+#### 新規ファイル作成
+- **`src/hooks/useVirtualCanvas.ts`**: 仮想キャンバス管理システム
+  - お手本画像サイズ基準の仮想サイズ計算ロジック
+  - デバイス制約考慮（90%上限、4K制限付き）
+  - 過去最大サイズ保持（縮小防止機能）
+  - ビューポート・スクロール状態の動的管理
+
+#### 既存コンポーネント大幅改修
+- **DrawingCanvas**: 仮想キャンバス対応
+  - ビューポート・仮想コンテナの2層構造実装
+  - スクロール対応（overflow: auto/hidden切り替え）
+  - 座標系変換（表示座標→仮想キャンバス座標）
+  - 仮想サイズ変更時の自動再描画システム
+- **App.tsx**: 画像サイズ状態管理
+  - お手本画像サイズの一元管理
+  - ReferencePanel→DrawingPanelへの画像情報伝達
+- **ReferencePanel**: 画像サイズ検出機能
+  - 画像読み込み時の naturalWidth/Height 取得
+  - onImageDimensionsChange コールバック実装
+- **DrawingPanel**: 画像サイズ連携
+  - お手本画像サイズをDrawingCanvasに伝達
+
+#### 技術実装の詳細
+**仮想キャンバスサイズ決定戦略:**
+```typescript
+// 基準: お手本画像サイズ（ない場合は1200x800デフォルト）
+// 制約: デバイス画面サイズ90%上限（4K制限付き）
+// 最小保証: 現在ビューポートサイズと800x600の大きい方
+// 拡張: 過去最大到達サイズを維持（縮小禁止）
+```
+
+**座標系変換システム:**
+```typescript
+const virtualX = (event.clientX - rect.left) * (virtualSize.width / rect.width)
+const virtualY = (event.clientY - rect.top) * (virtualSize.height / rect.height)
+```
+
+**スクロール制御:**
+```typescript
+overflow: needsScroll ? 'auto' : 'hidden'
+// needsScroll = virtualSize > viewportSize
+```
+
+#### 期待効果の実現
+- ✅ **大画像対応**: お手本画像サイズに合わせた十分な描画領域確保
+- ✅ **小画面対応**: スクロールで全体確認可能な柔軟なUI
+- ✅ **座標精度**: 正確な描画位置維持（リサイズ・スクロール耐性）
+- ✅ **ビルド成功**: TypeScript型安全性維持
+- ✅ **開発サーバー動作**: 実際の動作確認可能
+
+#### 未完了タスク
+- ❌ **テスト修正**: DrawingCanvasテストのタイムアウト問題
+  - 仮想キャンバス対応によるテストケース更新が必要
+  - useVirtualCanvasフックのモック対応が必要
+  - 座標変換ロジックのテスト更新が必要
+
 ## MVP完成・機能拡張完了
 - ✅ お手本表示（画像アップロード・グリッド）
 - ✅ 描画機能（Canvas・ペン設定）
