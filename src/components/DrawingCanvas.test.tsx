@@ -31,7 +31,12 @@ beforeEach(() => {
     top: 0,
     width: 800,
     height: 600,
-  }))
+    right: 800,
+    bottom: 600,
+    x: 0,
+    y: 0,
+    toJSON: () => ({})
+  } as DOMRect))
   
   // Canvas width/height プロパティをモック
   Object.defineProperty(HTMLCanvasElement.prototype, 'width', {
@@ -55,7 +60,10 @@ describe('DrawingCanvas', () => {
   const defaultProps = {
     penSize: 1,
     penColor: '#000000',
-    onClear: vi.fn(),
+    gridVisible: false,
+    gridSize: 20,
+    gridLineWidth: 1,
+    gridColor: '#ddd',
   }
 
   it('renders canvas element', () => {
@@ -73,30 +81,38 @@ describe('DrawingCanvas', () => {
     expect(container.firstChild).toHaveClass('drawing-canvas')
   })
 
-  it('renders clear button', () => {
-    render(<DrawingCanvas {...defaultProps} />)
+  it('provides clearCanvas method through ref', () => {
+    let canvasRef: any = null
     
-    expect(screen.getByText('クリア')).toBeInTheDocument()
-    expect(screen.getByRole('button')).toBeInTheDocument()
+    const TestComponent = () => (
+      <DrawingCanvas 
+        {...defaultProps} 
+        ref={(ref) => { canvasRef = ref }}
+      />
+    )
+    
+    render(<TestComponent />)
+    
+    expect(canvasRef).toBeTruthy()
+    expect(typeof canvasRef.clearCanvas).toBe('function')
   })
 
-  it('calls onClear when clear button is clicked', async () => {
-    const mockOnClear = vi.fn()
-    render(<DrawingCanvas {...defaultProps} onClear={mockOnClear} />)
+  it('clears canvas and strokes when clearCanvas is called through ref', () => {
+    let canvasRef: any = null
     
-    const clearButton = screen.getByText('クリア')
-    fireEvent.click(clearButton)
+    const TestComponent = () => (
+      <DrawingCanvas 
+        {...defaultProps} 
+        ref={(ref) => { canvasRef = ref }}
+      />
+    )
     
-    expect(mockOnClear).toHaveBeenCalled()
-  })
-
-  it('clears canvas when clear button is clicked', async () => {
-    render(<DrawingCanvas {...defaultProps} />)
+    render(<TestComponent />)
     
-    const clearButton = screen.getByText('クリア')
-    fireEvent.click(clearButton)
+    // Clear canvas through ref
+    canvasRef.clearCanvas()
     
-    expect(mockClearRect).toHaveBeenCalled()
+    expect(mockClearRect).toHaveBeenCalledWith(0, 0, 800, 600)
   })
 
   it('starts drawing on mouse down', () => {
@@ -105,8 +121,9 @@ describe('DrawingCanvas', () => {
     const canvas = screen.getByRole('img', { hidden: true })
     fireEvent.mouseDown(canvas, { clientX: 100, clientY: 100 })
     
-    expect(mockBeginPath).toHaveBeenCalled()
-    expect(mockMoveTo).toHaveBeenCalledWith(100, 100)
+    // ストローク方式では初回描画はmousemoveで発生するため、mousedownでは描画されない
+    expect(mockBeginPath).not.toHaveBeenCalled()
+    expect(mockMoveTo).not.toHaveBeenCalled()
   })
 
   it('draws line on mouse move when drawing', () => {
@@ -116,6 +133,9 @@ describe('DrawingCanvas', () => {
     fireEvent.mouseDown(canvas, { clientX: 100, clientY: 100 })
     fireEvent.mouseMove(canvas, { clientX: 150, clientY: 150 })
     
+    // ストローク方式では初回移動で線分描画が開始される
+    expect(mockBeginPath).toHaveBeenCalled()
+    expect(mockMoveTo).toHaveBeenCalledWith(100, 100)
     expect(mockLineTo).toHaveBeenCalledWith(150, 150)
     expect(mockStroke).toHaveBeenCalled()
   })
@@ -128,11 +148,20 @@ describe('DrawingCanvas', () => {
     fireEvent.mouseMove(canvas, { clientX: 150, clientY: 150 })
     fireEvent.mouseUp(canvas)
     
+    // Clear previous calls to check mouse up behavior
+    mockBeginPath.mockClear()
+    mockMoveTo.mockClear()
+    mockLineTo.mockClear()
+    mockStroke.mockClear()
+    
     // After mouse up, mouse move should not draw
     fireEvent.mouseMove(canvas, { clientX: 200, clientY: 200 })
     
-    // LineTo should only have been called once (during the first move)
-    expect(mockLineTo).toHaveBeenCalledTimes(1)
+    // No additional drawing should occur after mouse up
+    expect(mockBeginPath).not.toHaveBeenCalled()
+    expect(mockMoveTo).not.toHaveBeenCalled()
+    expect(mockLineTo).not.toHaveBeenCalled()
+    expect(mockStroke).not.toHaveBeenCalled()
   })
 
   it('applies pen size and color to context', () => {
@@ -150,7 +179,7 @@ describe('DrawingCanvas', () => {
     
     mockGetContext.mockReturnValue(mockContext)
     
-    render(<DrawingCanvas penSize={3} penColor="#ff0000" onClear={vi.fn()} />)
+    render(<DrawingCanvas {...defaultProps} penSize={3} penColor="#ff0000" />)
     
     // Check that properties were set
     expect(mockContext.lineWidth).toBe(3)
@@ -164,14 +193,20 @@ describe('DrawingCanvas', () => {
       top: 0,
       width: 400, // Half the canvas width
       height: 300, // Half the canvas height
-    }))
+      right: 400,
+      bottom: 300,
+      x: 0,
+      y: 0,
+      toJSON: () => ({})
+    } as DOMRect))
     
     render(<DrawingCanvas {...defaultProps} />)
     
     const canvas = screen.getByRole('img', { hidden: true })
     
-    // Click at display position (100, 100)
+    // ストローク方式では描画はmousemoveで開始されるため、2回のイベントを発生
     fireEvent.mouseDown(canvas, { clientX: 100, clientY: 100 })
+    fireEvent.mouseMove(canvas, { clientX: 100, clientY: 100 })
     
     // Should be scaled to internal position (200, 200)
     expect(mockMoveTo).toHaveBeenCalledWith(200, 200)

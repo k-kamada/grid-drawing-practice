@@ -73,7 +73,6 @@ describe('ReferencePanel', () => {
   })
 
   it('shows grid overlay when image is present and grid is enabled', async () => {
-    const user = userEvent.setup()
     const props = { ...defaultProps, gridVisible: true, onImageDimensionsChange: vi.fn() }
     render(<ReferencePanel {...props} />)
     

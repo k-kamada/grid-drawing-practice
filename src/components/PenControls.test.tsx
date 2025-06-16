@@ -9,6 +9,7 @@ describe('PenControls', () => {
     penColor: '#000000',
     onPenSizeChange: vi.fn(),
     onPenColorChange: vi.fn(),
+    onClear: vi.fn(),
   }
 
   it('renders pen size control', () => {

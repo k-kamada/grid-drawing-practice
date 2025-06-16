@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { render, screen } from '../test/test-utils'
 import ImageDisplay from './ImageDisplay'
 
@@ -6,8 +6,7 @@ describe('ImageDisplay', () => {
   const mockImageSrc = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=='
 
   it('renders image when imageSrc is provided', () => {
-    const mockOnImageDimensionsChange = vi.fn()
-    render(<ImageDisplay imageSrc={mockImageSrc} onImageDimensionsChange={mockOnImageDimensionsChange} />)
+    render(<ImageDisplay imageSrc={mockImageSrc} />)
     
     const image = screen.getByRole('img')
     expect(image).toBeInTheDocument()
@@ -30,15 +29,13 @@ describe('ImageDisplay', () => {
   })
 
   it('applies proper CSS class to container', () => {
-    const mockOnImageDimensionsChange = vi.fn()
-    const { container } = render(<ImageDisplay imageSrc={mockImageSrc} onImageDimensionsChange={mockOnImageDimensionsChange} />)
+    const { container } = render(<ImageDisplay imageSrc={mockImageSrc} />)
     
     expect(container.firstChild).toHaveClass('image-display')
   })
 
   it('applies responsive styling to image', () => {
-    const mockOnImageDimensionsChange = vi.fn()
-    render(<ImageDisplay imageSrc={mockImageSrc} onImageDimensionsChange={mockOnImageDimensionsChange} />)
+    render(<ImageDisplay imageSrc={mockImageSrc} />)
     
     const image = screen.getByRole('img')
     expect(image).toHaveClass('image-display__image')

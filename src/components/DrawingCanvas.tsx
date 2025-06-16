@@ -1,5 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback, forwardRef, useImperativeHandle } from 'react'
 import GridOverlay from './GridOverlay'
+import { useDrawingStrokes } from '../hooks/useDrawingStrokes'
+import type { DrawingPoint } from '../types/drawing'
 import './DrawingCanvas.css'
 
 interface DrawingCanvasProps {
@@ -9,22 +11,51 @@ interface DrawingCanvasProps {
   gridSize: number
   gridLineWidth: number
   gridColor: string
+  onClear?: () => void
 }
 
-const DrawingCanvas = forwardRef<HTMLCanvasElement, DrawingCanvasProps>(({
+// 親コンポーネントがアクセスできるメソッドの型定義
+export interface DrawingCanvasRef {
+  clearCanvas: () => void
+}
+
+const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
   penSize,
   penColor,
   gridVisible,
   gridSize,
   gridLineWidth,
-  gridColor
+  gridColor,
+  onClear
 }, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 })
 
-  useImperativeHandle(ref, () => canvasRef.current!, []);
+  // ストローク履歴管理フック
+  const {
+    startStroke,
+    addPointToStroke,
+    finishStroke,
+    clearAllStrokes,
+    redrawAllStrokes
+  } = useDrawingStrokes()
+
+  // 親コンポーネントに公開するメソッド
+  const clearCanvas = useCallback(() => {
+    clearAllStrokes()
+    const canvas = canvasRef.current
+    if (canvas) {
+      const context = canvas.getContext('2d')
+      context?.clearRect(0, 0, canvas.width, canvas.height)
+    }
+    onClear?.()
+  }, [clearAllStrokes, onClear])
+
+  useImperativeHandle(ref, () => ({
+    clearCanvas
+  }), [clearCanvas]);
 
   // コンテナサイズに応じてキャンバスサイズを調整
   useEffect(() => {
@@ -48,6 +79,15 @@ const DrawingCanvas = forwardRef<HTMLCanvasElement, DrawingCanvasProps>(({
     }
   }, [])
 
+  // キャンバスサイズ変更時にストロークを再描画
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    // キャンバスサイズ変更後に全ストロークを再描画
+    redrawAllStrokes(canvas)
+  }, [canvasSize, redrawAllStrokes])
+
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -61,7 +101,7 @@ const DrawingCanvas = forwardRef<HTMLCanvasElement, DrawingCanvasProps>(({
     context.lineJoin = 'round'
   }, [penSize, penColor])
 
-  const getMousePosition = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
+  const getMousePosition = useCallback((event: React.MouseEvent<HTMLCanvasElement>): DrawingPoint => {
     const canvas = canvasRef.current
     if (!canvas) return { x: 0, y: 0 }
 
@@ -79,33 +119,45 @@ const DrawingCanvas = forwardRef<HTMLCanvasElement, DrawingCanvasProps>(({
 
   const startDrawing = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
     const position = getMousePosition(event)
-    const canvas = canvasRef.current
-    const context = canvas?.getContext('2d')
     
-    if (!context) return
-
     setIsDrawing(true)
-    
-    context.beginPath()
-    context.moveTo(position.x, position.y)
-  }, [getMousePosition])
+    startStroke(position, penSize, penColor)
+  }, [getMousePosition, startStroke, penSize, penColor])
 
   const draw = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isDrawing) return
 
     const position = getMousePosition(event)
-    const canvas = canvasRef.current
-    const context = canvas?.getContext('2d')
+    const updatedStroke = addPointToStroke(position)
     
-    if (!context) return
-
-    context.lineTo(position.x, position.y)
-    context.stroke()
-  }, [isDrawing, getMousePosition])
+    // リアルタイム描画のために現在のストロークのみ描画
+    if (updatedStroke) {
+      const canvas = canvasRef.current
+      const context = canvas?.getContext('2d')
+      
+      if (context && updatedStroke.points.length >= 2) {
+        const lastPoint = updatedStroke.points[updatedStroke.points.length - 2]
+        const currentPoint = updatedStroke.points[updatedStroke.points.length - 1]
+        
+        context.strokeStyle = updatedStroke.penColor
+        context.lineWidth = updatedStroke.penSize
+        context.lineCap = 'round'
+        context.lineJoin = 'round'
+        
+        context.beginPath()
+        context.moveTo(lastPoint.x, lastPoint.y)
+        context.lineTo(currentPoint.x, currentPoint.y)
+        context.stroke()
+      }
+    }
+  }, [isDrawing, getMousePosition, addPointToStroke])
 
   const stopDrawing = useCallback(() => {
-    setIsDrawing(false)
-  }, [])
+    if (isDrawing) {
+      finishStroke()
+      setIsDrawing(false)
+    }
+  }, [isDrawing, finishStroke])
 
 
   return (

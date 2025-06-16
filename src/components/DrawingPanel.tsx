@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
 import PenControls from './PenControls'
-import DrawingCanvas from './DrawingCanvas'
+import DrawingCanvas, { type DrawingCanvasRef } from './DrawingCanvas'
 import './DrawingPanel.css'
 
 interface DrawingPanelProps {
@@ -18,7 +18,7 @@ const DrawingPanel: React.FC<DrawingPanelProps> = ({
 }) => {
   const [penSize, setPenSize] = useState(1)
   const [penColor, setPenColor] = useState('#000000')
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const canvasRef = useRef<DrawingCanvasRef>(null)
 
   const handlePenSizeChange = (size: number) => {
     setPenSize(size)
@@ -29,12 +29,7 @@ const DrawingPanel: React.FC<DrawingPanelProps> = ({
   }
 
   const handleClear = () => {
-    const canvas = canvasRef.current
-    const context = canvas?.getContext('2d')
-    
-    if (!context || !canvas) return
-
-    context.clearRect(0, 0, canvas.width, canvas.height)
+    canvasRef.current?.clearCanvas()
   }
 
   return (
