@@ -73,8 +73,8 @@ const ReferencePanel: React.FC<ReferencePanelProps> = ({
                 value={gridSize}
                 onChange={handleGridSizeChange}
                 min="10"
-                max="100"
-                step="5"
+                max="300"
+                step="10"
                 aria-label="グリッドサイズ"
               />
               px

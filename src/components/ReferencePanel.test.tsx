@@ -5,7 +5,7 @@ import ReferencePanel from './ReferencePanel'
 
 const defaultProps = {
   gridVisible: false,
-  gridSize: 20,
+  gridSize: 100,
   gridLineWidth: 1,
   gridColor: '#000000',
   scrollPosition: { x: 0, y: 0 },
@@ -65,13 +65,13 @@ describe('ReferencePanel', () => {
     render(<ReferencePanel {...props} />)
     
     const gridSizeInput = screen.getByLabelText('グリッドサイズ')
-    expect(gridSizeInput).toHaveValue(20)
+    expect(gridSizeInput).toHaveValue(100)
     
     // fireEventを使用してより直接的なテストを実行
-    fireEvent.change(gridSizeInput, { target: { value: '30' } })
+    fireEvent.change(gridSizeInput, { target: { value: '150' } })
     
     // グリッドサイズ変更のコールバックが正しく呼ばれることを確認
-    expect(props.onGridSizeChange).toHaveBeenCalledWith(30)
+    expect(props.onGridSizeChange).toHaveBeenCalledWith(150)
   })
 
   it('shows grid overlay when image is present and grid is enabled', async () => {

@@ -7,7 +7,7 @@ import './App.css'
 
 function App() {
   const [gridVisible, setGridVisible] = useState(false)
-  const [gridSize, setGridSize] = useState(20)
+  const [gridSize, setGridSize] = useState(100)
   const [gridLineWidth] = useState(1)
   const [gridColor] = useState('#000000')
   const [imageSize, setImageSize] = useState<Size | null>(null)
