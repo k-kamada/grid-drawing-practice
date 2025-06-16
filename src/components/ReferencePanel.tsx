@@ -15,6 +15,7 @@ interface ReferencePanelProps {
   onGridSizeChange: (size: number) => void
   onImageDimensionsChange: (size: Size | null) => void
   onScrollChange: (position: { x: number, y: number }) => void
+  onReferenceImageChange: (imageSrc: string | null) => void
 }
 
 const ReferencePanel: React.FC<ReferencePanelProps> = ({
@@ -27,6 +28,7 @@ const ReferencePanel: React.FC<ReferencePanelProps> = ({
   onGridSizeChange,
   onImageDimensionsChange,
   onScrollChange,
+  onReferenceImageChange,
 }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [imageSize, setImageSize] = useState<Size | null>(null)
@@ -34,6 +36,7 @@ const ReferencePanel: React.FC<ReferencePanelProps> = ({
   const handleImageSelect = (file: File) => {
     const imageUrl = URL.createObjectURL(file)
     setSelectedImage(imageUrl)
+    onReferenceImageChange(imageUrl)
   }
 
   const handleImageDimensionsChange = (size: Size | null) => {

@@ -13,6 +13,8 @@ interface DrawingCanvasProps {
   gridColor: string
   imageSize?: Size | null
   scrollPosition?: { x: number, y: number }
+  overlayVisible?: boolean
+  referenceImageSrc?: string | null
   onClear?: () => void
 }
 
@@ -30,6 +32,8 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
   gridColor,
   imageSize,
   scrollPosition = { x: 0, y: 0 },
+  overlayVisible = false,
+  referenceImageSrc,
   onClear
 }, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -159,6 +163,24 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
     return `url("data:image/svg+xml,${encodedSvg}") ${center} ${center}, crosshair`
   }, [])
 
+  // 重ね合わせ画像のスタイル計算
+  const getOverlayImageStyle = useCallback(() => {
+    if (!imageSize) {
+      return {
+        maxWidth: 'none',
+        maxHeight: 'none',
+      }
+    }
+
+    // お手本画像と同じ元サイズで表示
+    return {
+      width: `${imageSize.width}px`,
+      height: `${imageSize.height}px`,
+      maxWidth: 'none',
+      maxHeight: 'none',
+    }
+  }, [imageSize])
+
   // お手本画像サイズ変更時の仮想キャンバス更新（緊急修正：無効化）
   // useEffect(() => {
   //   if (imageSize) {
@@ -268,6 +290,20 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
             cursor: generateCursor(penSize)  // ペンサイズに応じたカスタムカーソル
           }}
         />
+        {overlayVisible && referenceImageSrc && (
+          <img
+            src={referenceImageSrc}
+            alt="重ね合わせ画像"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              opacity: 0.5,
+              pointerEvents: 'none',
+              ...getOverlayImageStyle(),
+            }}
+          />
+        )}
         {gridVisible && (
           <GridOverlay
             visible={gridVisible}

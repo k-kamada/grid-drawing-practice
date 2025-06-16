@@ -7,6 +7,8 @@ interface PenControlsProps {
   onPenSizeChange: (size: number) => void
   onPenColorChange: (color: string) => void
   onClear: () => void
+  overlayVisible?: boolean
+  onOverlayToggle?: (visible: boolean) => void
 }
 
 const PenControls: React.FC<PenControlsProps> = ({
@@ -14,7 +16,9 @@ const PenControls: React.FC<PenControlsProps> = ({
   penColor,
   onPenSizeChange,
   onPenColorChange,
-  onClear
+  onClear,
+  overlayVisible = false,
+  onOverlayToggle
 }) => {
   const presetSizes = [
     { label: '細', value: 1 },
@@ -35,6 +39,12 @@ const PenControls: React.FC<PenControlsProps> = ({
 
   const handlePresetClick = (size: number) => {
     onPenSizeChange(size)
+  }
+
+  const handleOverlayToggle = () => {
+    if (onOverlayToggle) {
+      onOverlayToggle(!overlayVisible)
+    }
   }
 
   return (
@@ -89,6 +99,17 @@ const PenControls: React.FC<PenControlsProps> = ({
           </div>
         </div>
       </div>
+      
+      {onOverlayToggle && (
+        <button
+          type="button"
+          onClick={handleOverlayToggle}
+          className={`pen-controls__overlay-button ${overlayVisible ? 'pen-controls__overlay-button--active' : ''}`}
+          aria-label="重ね合わせ切り替え"
+        >
+          重ね合わせ {overlayVisible ? 'ON' : 'OFF'}
+        </button>
+      )}
       
       <button
         type="button"

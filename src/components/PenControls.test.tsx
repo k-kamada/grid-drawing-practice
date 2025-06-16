@@ -116,4 +116,51 @@ describe('PenControls', () => {
     
     expect(container.firstChild).toHaveClass('pen-controls')
   })
+
+  it('renders overlay toggle button', () => {
+    const mockOnOverlayToggle = vi.fn()
+    render(
+      <PenControls 
+        {...defaultProps} 
+        overlayVisible={false}
+        onOverlayToggle={mockOnOverlayToggle}
+      />
+    )
+    
+    const overlayButton = screen.getByRole('button', { name: /重ね合わせ/i })
+    expect(overlayButton).toBeInTheDocument()
+    expect(overlayButton).toHaveTextContent('重ね合わせ OFF')
+  })
+
+  it('toggles overlay visibility when overlay button is clicked', async () => {
+    const mockOnOverlayToggle = vi.fn()
+    const user = userEvent.setup()
+    
+    render(
+      <PenControls 
+        {...defaultProps} 
+        overlayVisible={false}
+        onOverlayToggle={mockOnOverlayToggle}
+      />
+    )
+    
+    const overlayButton = screen.getByRole('button', { name: /重ね合わせ/i })
+    await user.click(overlayButton)
+    
+    expect(mockOnOverlayToggle).toHaveBeenCalledWith(true)
+  })
+
+  it('shows correct overlay button state when overlay is visible', () => {
+    render(
+      <PenControls 
+        {...defaultProps} 
+        overlayVisible={true}
+        onOverlayToggle={vi.fn()}
+      />
+    )
+    
+    const overlayButton = screen.getByRole('button', { name: /重ね合わせ/i })
+    expect(overlayButton).toHaveTextContent('重ね合わせ ON')
+    expect(overlayButton).toHaveClass('pen-controls__overlay-button--active')
+  })
 })

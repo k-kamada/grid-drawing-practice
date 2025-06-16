@@ -13,6 +13,7 @@ const defaultProps = {
   onGridSizeChange: vi.fn(),
   onImageDimensionsChange: vi.fn(),
   onScrollChange: vi.fn(),
+  onReferenceImageChange: vi.fn(),
 }
 
 describe('ReferencePanel', () => {

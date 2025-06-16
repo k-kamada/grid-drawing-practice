@@ -9,6 +9,7 @@ const mockMoveTo = vi.fn()
 const mockLineTo = vi.fn()
 const mockStroke = vi.fn()
 const mockClearRect = vi.fn()
+const mockScale = vi.fn()
 
 beforeEach(() => {
   const mockContext = {
@@ -17,10 +18,12 @@ beforeEach(() => {
     lineTo: mockLineTo,
     stroke: mockStroke,
     clearRect: mockClearRect,
+    scale: mockScale,
     strokeStyle: '#000000',
     lineWidth: 2,
     lineCap: 'round',
     lineJoin: 'round',
+    imageSmoothingEnabled: true,
   }
   
   mockGetContext.mockReturnValue(mockContext)
@@ -210,5 +213,45 @@ describe('DrawingCanvas', () => {
     
     // Should be scaled to internal position (200, 200)
     expect(mockMoveTo).toHaveBeenCalledWith(200, 200)
+  })
+
+  it('renders overlay image when overlay is visible', () => {
+    render(
+      <DrawingCanvas 
+        {...defaultProps} 
+        overlayVisible={true}
+        referenceImageSrc="test-image.jpg"
+      />
+    )
+    
+    const overlayImage = screen.getByAltText('重ね合わせ画像')
+    expect(overlayImage).toBeInTheDocument()
+    expect(overlayImage).toHaveAttribute('src', 'test-image.jpg')
+  })
+
+  it('does not render overlay image when overlay is not visible', () => {
+    render(
+      <DrawingCanvas 
+        {...defaultProps} 
+        overlayVisible={false}
+        referenceImageSrc="test-image.jpg"
+      />
+    )
+    
+    const overlayImage = screen.queryByAltText('重ね合わせ画像')
+    expect(overlayImage).not.toBeInTheDocument()
+  })
+
+  it('does not render overlay image when no reference image is provided', () => {
+    render(
+      <DrawingCanvas 
+        {...defaultProps} 
+        overlayVisible={true}
+        referenceImageSrc={null}
+      />
+    )
+    
+    const overlayImage = screen.queryByAltText('重ね合わせ画像')
+    expect(overlayImage).not.toBeInTheDocument()
   })
 })

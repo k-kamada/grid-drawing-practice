@@ -11,6 +11,9 @@ interface DrawingPanelProps {
   gridColor: string
   imageSize?: Size | null
   scrollPosition: { x: number, y: number }
+  overlayVisible: boolean
+  referenceImageSrc: string | null
+  onOverlayToggle: (visible: boolean) => void
 }
 
 const DrawingPanel: React.FC<DrawingPanelProps> = ({
@@ -20,6 +23,9 @@ const DrawingPanel: React.FC<DrawingPanelProps> = ({
   gridColor,
   imageSize,
   scrollPosition,
+  overlayVisible,
+  referenceImageSrc,
+  onOverlayToggle,
 }) => {
   const [penSize, setPenSize] = useState(1)
   const [penColor, setPenColor] = useState('#000000')
@@ -46,6 +52,8 @@ const DrawingPanel: React.FC<DrawingPanelProps> = ({
           onPenSizeChange={handlePenSizeChange}
           onPenColorChange={handlePenColorChange}
           onClear={handleClear}
+          overlayVisible={overlayVisible}
+          onOverlayToggle={onOverlayToggle}
         />
       </div>
       <div className="drawing-panel__canvas">
@@ -58,6 +66,8 @@ const DrawingPanel: React.FC<DrawingPanelProps> = ({
           gridColor={gridColor}
           imageSize={imageSize}
           scrollPosition={scrollPosition}
+          overlayVisible={overlayVisible}
+          referenceImageSrc={referenceImageSrc}
           ref={canvasRef}
         />
       </div>
