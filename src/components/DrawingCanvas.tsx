@@ -22,7 +22,31 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
   gridColor
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
+  const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 })
+
+  // コンテナサイズに応じてキャンバスサイズを調整
+  useEffect(() => {
+    const updateCanvasSize = () => {
+      const container = containerRef.current
+      if (!container) return
+
+      const { clientWidth, clientHeight } = container
+      setCanvasSize({ width: clientWidth, height: clientHeight })
+    }
+
+    updateCanvasSize()
+    
+    const resizeObserver = new ResizeObserver(updateCanvasSize)
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current)
+    }
+
+    return () => {
+      resizeObserver.disconnect()
+    }
+  }, [])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -105,11 +129,11 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         </button>
       </div>
       <div className="drawing-canvas__area">
-        <div className="drawing-canvas__container">
+        <div ref={containerRef} className="drawing-canvas__container">
           <canvas
             ref={canvasRef}
-            width={800}
-            height={600}
+            width={canvasSize.width}
+            height={canvasSize.height}
             className="drawing-canvas__canvas"
             onMouseDown={startDrawing}
             onMouseMove={draw}

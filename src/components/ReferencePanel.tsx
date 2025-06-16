@@ -75,12 +75,21 @@ const ReferencePanel: React.FC<ReferencePanelProps> = ({
           <div className="reference-panel__image-container" data-testid="image-container">
             <ImageDisplay imageSrc={selectedImage} />
             {gridVisible && (
-              <GridOverlay
-                visible={gridVisible}
-                gridSize={gridSize}
-                lineWidth={gridLineWidth}
-                color={gridColor}
-              />
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                pointerEvents: 'none'
+              }}>
+                <GridOverlay
+                  visible={gridVisible}
+                  gridSize={gridSize}
+                  lineWidth={gridLineWidth}
+                  color={gridColor}
+                />
+              </div>
             )}
           </div>
         ) : (

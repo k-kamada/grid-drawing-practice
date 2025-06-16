@@ -53,8 +53,5 @@
 .reference-panel__image-container {
   position: relative;
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  overflow: auto;
 }
