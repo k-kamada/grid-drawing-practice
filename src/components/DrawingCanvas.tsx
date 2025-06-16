@@ -142,6 +142,23 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
     container.scrollTop = scrollPosition.y
   }, [scrollPosition])
 
+  // カスタムカーソルを生成
+  const generateCursor = useCallback((size: number) => {
+    const cursorSize = Math.max(24, size * 2 + 12) // 最小24px、ペンサイズに応じて拡大
+    const center = cursorSize / 2
+    const radius = Math.max(8, size + 6) // 最小8px、ペンサイズに応じて拡大
+    
+    const svg = `
+      <svg width="${cursorSize}" height="${cursorSize}" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="#fff" stroke-width="2"/>
+        <circle cx="${center}" cy="${center}" r="${radius}" fill="none" stroke="#000" stroke-width="1"/>
+      </svg>
+    `.trim()
+    
+    const encodedSvg = encodeURIComponent(svg)
+    return `url("data:image/svg+xml,${encodedSvg}") ${center} ${center}, crosshair`
+  }, [])
+
   // お手本画像サイズ変更時の仮想キャンバス更新（緊急修正：無効化）
   // useEffect(() => {
   //   if (imageSize) {
@@ -247,7 +264,8 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
           style={{
             display: 'block',
             imageRendering: 'pixelated',  // アンチエイリアス無効化
-            backgroundColor: 'white'  // 背景を白に設定
+            backgroundColor: 'white',  // 背景を白に設定
+            cursor: generateCursor(penSize)  // ペンサイズに応じたカスタムカーソル
           }}
         />
         {gridVisible && (
