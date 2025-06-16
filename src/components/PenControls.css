@@ -100,60 +100,55 @@
   cursor: pointer;
 }
 
-.pen-controls__clear-button {
-  position: absolute;
-  bottom: 0.5rem;
-  right: 0.5rem;
+/* ボタングループのFlexレイアウト */
+.pen-controls__button-group {
+  display: flex;
+  justify-content: flex-end; /* 右端に配置 */
+  align-items: center;
+  gap: 0.75rem; /* ボタン間の等間隔 */
+  margin-top: 0; /* キャンバスへのめり込み防止 */
+  padding: 0.5rem 0 0 0; /* 上パディングのみ */
+}
+
+/* 共通のボタンスタイル */
+.pen-controls__action-button {
   padding: 0.25rem 0.5rem;
-  background-color: #ff4444;
-  color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.8rem;
   transition: background-color 0.3s ease;
+  color: white;
+  flex: 0 0 auto; /* サイズ固定 */
 }
 
-.pen-controls__clear-button:hover {
-  background-color: #cc3333;
+/* 保存ボタン */
+.pen-controls__action-button--save {
+  background-color: #28a745;
 }
 
-.pen-controls__overlay-button {
-  position: absolute;
-  bottom: 0.5rem;
-  right: 6rem; /* クリアボタンの左側に配置 */
-  padding: 0.25rem 0.5rem;
+.pen-controls__action-button--save:hover {
+  background-color: #218838;
+}
+
+/* 重ね合わせボタン */
+.pen-controls__action-button--overlay {
   background-color: #646cff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.8rem;
-  transition: background-color 0.3s ease;
 }
 
-.pen-controls__overlay-button:hover {
+.pen-controls__action-button--overlay:hover {
   background-color: #535bf2;
 }
 
-.pen-controls__overlay-button--active {
+.pen-controls__action-button--overlay-active {
   background-color: #4c4fff;
 }
 
-.pen-controls__save-button {
-  position: absolute;
-  bottom: 0.5rem;
-  right: 10rem; /* 重ね合わせボタンの左側に配置 */
-  padding: 0.25rem 0.5rem;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.8rem;
-  transition: background-color 0.3s ease;
+/* クリアボタン */
+.pen-controls__action-button--clear {
+  background-color: #ff4444;
 }
 
-.pen-controls__save-button:hover {
-  background-color: #218838;
+.pen-controls__action-button--clear:hover {
+  background-color: #cc3333;
 }

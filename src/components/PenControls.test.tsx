@@ -162,7 +162,7 @@ describe('PenControls', () => {
     
     const overlayButton = screen.getByRole('button', { name: /重ね合わせ/i })
     expect(overlayButton).toHaveTextContent('重ね合わせ ON')
-    expect(overlayButton).toHaveClass('pen-controls__overlay-button--active')
+    expect(overlayButton).toHaveClass('pen-controls__action-button--overlay-active')
   })
 
   it('renders save button', () => {
@@ -170,7 +170,7 @@ describe('PenControls', () => {
     
     const saveButton = screen.getByRole('button', { name: '保存' })
     expect(saveButton).toBeInTheDocument()
-    expect(saveButton).toHaveClass('pen-controls__save-button')
+    expect(saveButton).toHaveClass('pen-controls__action-button--save')
   })
 
   it('calls onSave when save button is clicked', () => {

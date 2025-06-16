@@ -102,32 +102,34 @@ const PenControls: React.FC<PenControlsProps> = ({
         </div>
       </div>
       
-      {onOverlayToggle && (
+      <div className="pen-controls__button-group">
         <button
           type="button"
-          onClick={handleOverlayToggle}
-          className={`pen-controls__overlay-button ${overlayVisible ? 'pen-controls__overlay-button--active' : ''}`}
-          aria-label="重ね合わせ切り替え"
+          onClick={onSave}
+          className="pen-controls__action-button pen-controls__action-button--save"
         >
-          重ね合わせ {overlayVisible ? 'ON' : 'OFF'}
+          保存
         </button>
-      )}
-      
-      <button
-        type="button"
-        onClick={onSave}
-        className="pen-controls__save-button"
-      >
-        保存
-      </button>
-      
-      <button
-        type="button"
-        onClick={onClear}
-        className="pen-controls__clear-button"
-      >
-        クリア
-      </button>
+        
+        {onOverlayToggle && (
+          <button
+            type="button"
+            onClick={handleOverlayToggle}
+            className={`pen-controls__action-button pen-controls__action-button--overlay ${overlayVisible ? 'pen-controls__action-button--overlay-active' : ''}`}
+            aria-label="重ね合わせ切り替え"
+          >
+            重ね合わせ {overlayVisible ? 'ON' : 'OFF'}
+          </button>
+        )}
+        
+        <button
+          type="button"
+          onClick={onClear}
+          className="pen-controls__action-button pen-controls__action-button--clear"
+        >
+          クリア
+        </button>
+      </div>
     </div>
   )
 }
