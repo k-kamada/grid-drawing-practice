@@ -4,12 +4,24 @@ import ImageDisplay from './ImageDisplay'
 import GridOverlay from './GridOverlay'
 import './ReferencePanel.css'
 
-const ReferencePanel: React.FC = () => {
+interface ReferencePanelProps {
+  gridVisible: boolean
+  gridSize: number
+  gridLineWidth: number
+  gridColor: string
+  onGridVisibleChange: (visible: boolean) => void
+  onGridSizeChange: (size: number) => void
+}
+
+const ReferencePanel: React.FC<ReferencePanelProps> = ({
+  gridVisible,
+  gridSize,
+  gridLineWidth,
+  gridColor,
+  onGridVisibleChange,
+  onGridSizeChange,
+}) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
-  const [gridVisible, setGridVisible] = useState(false)
-  const [gridSize, setGridSize] = useState(20)
-  const [gridLineWidth] = useState(1)
-  const [gridColor] = useState('#000000')
 
   const handleImageSelect = (file: File) => {
     const imageUrl = URL.createObjectURL(file)
@@ -17,11 +29,11 @@ const ReferencePanel: React.FC = () => {
   }
 
   const handleGridToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setGridVisible(event.target.checked)
+    onGridVisibleChange(event.target.checked)
   }
 
   const handleGridSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setGridSize(Number(event.target.value))
+    onGridSizeChange(Number(event.target.value))
   }
 
   return (

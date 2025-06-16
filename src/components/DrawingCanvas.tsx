@@ -1,16 +1,25 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react'
+import GridOverlay from './GridOverlay'
 import './DrawingCanvas.css'
 
 interface DrawingCanvasProps {
   penSize: number
   penColor: string
   onClear: () => void
+  gridVisible: boolean
+  gridSize: number
+  gridLineWidth: number
+  gridColor: string
 }
 
 const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
   penSize,
   penColor,
-  onClear
+  onClear,
+  gridVisible,
+  gridSize,
+  gridLineWidth,
+  gridColor
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
@@ -96,18 +105,28 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({
         </button>
       </div>
       <div className="drawing-canvas__area">
-        <canvas
-          ref={canvasRef}
-          width={800}
-          height={600}
-          className="drawing-canvas__canvas"
-          onMouseDown={startDrawing}
-          onMouseMove={draw}
-          onMouseUp={stopDrawing}
-          onMouseLeave={stopDrawing}
-          role="img"
-          aria-label="描画キャンバス"
-        />
+        <div className="drawing-canvas__container">
+          <canvas
+            ref={canvasRef}
+            width={800}
+            height={600}
+            className="drawing-canvas__canvas"
+            onMouseDown={startDrawing}
+            onMouseMove={draw}
+            onMouseUp={stopDrawing}
+            onMouseLeave={stopDrawing}
+            role="img"
+            aria-label="描画キャンバス"
+          />
+          {gridVisible && (
+            <GridOverlay
+              visible={gridVisible}
+              gridSize={gridSize}
+              lineWidth={gridLineWidth}
+              color={gridColor}
+            />
+          )}
+        </div>
       </div>
     </div>
   )

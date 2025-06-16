@@ -15,9 +15,9 @@ const PenControls: React.FC<PenControlsProps> = ({
   onPenColorChange
 }) => {
   const presetSizes = [
-    { label: '細', value: 2 },
-    { label: '中', value: 5 },
-    { label: '太', value: 10 }
+    { label: '細', value: 1 },
+    { label: '中', value: 2 },
+    { label: '太', value: 3 }
   ]
 
   const handleSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {

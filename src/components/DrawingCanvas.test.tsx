@@ -53,7 +53,7 @@ beforeEach(() => {
 
 describe('DrawingCanvas', () => {
   const defaultProps = {
-    penSize: 2,
+    penSize: 1,
     penColor: '#000000',
     onClear: vi.fn(),
   }
@@ -143,17 +143,17 @@ describe('DrawingCanvas', () => {
       stroke: mockStroke,
       clearRect: mockClearRect,
       strokeStyle: '#000000',
-      lineWidth: 2,
+      lineWidth: 1,
       lineCap: 'round',
       lineJoin: 'round',
     }
     
     mockGetContext.mockReturnValue(mockContext)
     
-    render(<DrawingCanvas penSize={5} penColor="#ff0000" onClear={vi.fn()} />)
+    render(<DrawingCanvas penSize={3} penColor="#ff0000" onClear={vi.fn()} />)
     
     // Check that properties were set
-    expect(mockContext.lineWidth).toBe(5)
+    expect(mockContext.lineWidth).toBe(3)
     expect(mockContext.strokeStyle).toBe('#ff0000')
   })
 

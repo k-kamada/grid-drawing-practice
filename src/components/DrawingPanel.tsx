@@ -3,8 +3,20 @@ import PenControls from './PenControls'
 import DrawingCanvas from './DrawingCanvas'
 import './DrawingPanel.css'
 
-const DrawingPanel: React.FC = () => {
-  const [penSize, setPenSize] = useState(2)
+interface DrawingPanelProps {
+  gridVisible: boolean
+  gridSize: number
+  gridLineWidth: number
+  gridColor: string
+}
+
+const DrawingPanel: React.FC<DrawingPanelProps> = ({
+  gridVisible,
+  gridSize,
+  gridLineWidth,
+  gridColor,
+}) => {
+  const [penSize, setPenSize] = useState(1)
   const [penColor, setPenColor] = useState('#000000')
 
   const handlePenSizeChange = (size: number) => {
@@ -34,6 +46,10 @@ const DrawingPanel: React.FC = () => {
           penSize={penSize}
           penColor={penColor}
           onClear={handleClear}
+          gridVisible={gridVisible}
+          gridSize={gridSize}
+          gridLineWidth={gridLineWidth}
+          gridColor={gridColor}
         />
       </div>
     </div>

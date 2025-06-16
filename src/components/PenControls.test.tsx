@@ -5,7 +5,7 @@ import PenControls from './PenControls'
 
 describe('PenControls', () => {
   const defaultProps = {
-    penSize: 2,
+    penSize: 1,
     penColor: '#000000',
     onPenSizeChange: vi.fn(),
     onPenColorChange: vi.fn(),
@@ -16,7 +16,7 @@ describe('PenControls', () => {
     
     expect(screen.getByText('ペン設定')).toBeInTheDocument()
     expect(screen.getByLabelText('ペンの太さ')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('2')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('1')).toBeInTheDocument()
   })
 
   it('renders pen color control', () => {
@@ -27,10 +27,10 @@ describe('PenControls', () => {
   })
 
   it('displays current pen size value', () => {
-    render(<PenControls {...defaultProps} penSize={5} />)
+    render(<PenControls {...defaultProps} penSize={3} />)
     
-    expect(screen.getByDisplayValue('5')).toBeInTheDocument()
-    expect(screen.getByText('5px')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('3')).toBeInTheDocument()
+    expect(screen.getByText('3px')).toBeInTheDocument()
   })
 
   it('displays current pen color value', () => {
@@ -81,11 +81,11 @@ describe('PenControls', () => {
     const mediumButton = screen.getByText('中')
     await user.click(mediumButton)
     
-    expect(mockOnPenSizeChange).toHaveBeenCalledWith(5)
+    expect(mockOnPenSizeChange).toHaveBeenCalledWith(2)
   })
 
   it('highlights active preset size', () => {
-    render(<PenControls {...defaultProps} penSize={5} />)
+    render(<PenControls {...defaultProps} penSize={2} />)
     
     const mediumButton = screen.getByText('中')
     expect(mediumButton).toHaveClass('pen-controls__preset-button--active')
