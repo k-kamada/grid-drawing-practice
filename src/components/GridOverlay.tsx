@@ -6,27 +6,36 @@ interface GridOverlayProps {
   gridSize: number
   lineWidth: number
   color: string
+  imageSize?: { width: number, height: number } | null
 }
 
 const GridOverlay: React.FC<GridOverlayProps> = ({ 
   visible, 
   gridSize, 
   lineWidth, 
-  color 
+  color,
+  imageSize
 }) => {
   if (!visible) {
     return null
   }
 
+  // お手本画像サイズに合わせてグリッド表示領域を決定
+  const gridWidth = imageSize ? `${imageSize.width}px` : '100%'
+  const gridHeight = imageSize ? `${imageSize.height}px` : '100%'
 
   return (
     <div className="grid-overlay">
       <svg 
-        width="100%" 
-        height="100%" 
+        width={gridWidth}
+        height={gridHeight}
         className="grid-overlay__svg"
         role="img"
         aria-hidden="true"
+        style={{
+          minWidth: gridWidth,
+          minHeight: gridHeight
+        }}
       >
         <defs>
           <pattern
@@ -54,8 +63,8 @@ const GridOverlay: React.FC<GridOverlayProps> = ({
           </pattern>
         </defs>
         <rect
-          width="100%"
-          height="100%"
+          width={gridWidth}
+          height={gridHeight}
           fill="url(#grid)"
         />
       </svg>

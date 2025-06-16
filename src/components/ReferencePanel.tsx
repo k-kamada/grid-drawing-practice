@@ -10,9 +10,11 @@ interface ReferencePanelProps {
   gridSize: number
   gridLineWidth: number
   gridColor: string
+  scrollPosition: { x: number, y: number }
   onGridVisibleChange: (visible: boolean) => void
   onGridSizeChange: (size: number) => void
   onImageDimensionsChange: (size: Size | null) => void
+  onScrollChange: (position: { x: number, y: number }) => void
 }
 
 const ReferencePanel: React.FC<ReferencePanelProps> = ({
@@ -20,28 +22,23 @@ const ReferencePanel: React.FC<ReferencePanelProps> = ({
   gridSize,
   gridLineWidth,
   gridColor,
+  scrollPosition,
   onGridVisibleChange,
   onGridSizeChange,
   onImageDimensionsChange,
+  onScrollChange,
 }) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [imageSize, setImageSize] = useState<Size | null>(null)
 
   const handleImageSelect = (file: File) => {
     const imageUrl = URL.createObjectURL(file)
     setSelectedImage(imageUrl)
-    
-    // 画像サイズを取得してコールバックで通知
-    const img = new Image()
-    img.onload = () => {
-      onImageDimensionsChange({
-        width: img.naturalWidth,
-        height: img.naturalHeight
-      })
-    }
-    img.onerror = () => {
-      onImageDimensionsChange(null)
-    }
-    img.src = imageUrl
+  }
+
+  const handleImageDimensionsChange = (size: Size | null) => {
+    setImageSize(size)
+    onImageDimensionsChange(size)
   }
 
   const handleGridToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,7 +86,12 @@ const ReferencePanel: React.FC<ReferencePanelProps> = ({
       <div className="reference-panel__image-area">
         {selectedImage ? (
           <div className="reference-panel__image-container" data-testid="image-container">
-            <ImageDisplay imageSrc={selectedImage} />
+            <ImageDisplay 
+              imageSrc={selectedImage}
+              scrollPosition={scrollPosition}
+              onScrollChange={onScrollChange}
+              onImageDimensionsChange={handleImageDimensionsChange}
+            />
             {gridVisible && (
               <div style={{
                 position: 'absolute',
@@ -104,6 +106,7 @@ const ReferencePanel: React.FC<ReferencePanelProps> = ({
                   gridSize={gridSize}
                   lineWidth={gridLineWidth}
                   color={gridColor}
+                  imageSize={imageSize}
                 />
               </div>
             )}

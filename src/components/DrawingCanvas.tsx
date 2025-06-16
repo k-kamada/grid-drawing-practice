@@ -11,7 +11,8 @@ interface DrawingCanvasProps {
   gridSize: number
   gridLineWidth: number
   gridColor: string
-  imageSize?: Size | null // 未使用（緊急修正）
+  imageSize?: Size | null
+  scrollPosition?: { x: number, y: number }
   onClear?: () => void
 }
 
@@ -27,7 +28,8 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
   gridSize,
   gridLineWidth,
   gridColor,
-  // imageSize, // 緊急修正：未使用
+  imageSize,
+  scrollPosition = { x: 0, y: 0 },
   onClear
 }, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -69,16 +71,20 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
       
       const { clientWidth, clientHeight } = container
       
+      // スクロール可能領域を確保するため、実際のキャンバスサイズを150%に
+      const actualWidth = Math.max(clientWidth * 1.5, imageSize?.width || clientWidth)
+      const actualHeight = Math.max(clientHeight * 1.5, imageSize?.height || clientHeight)
+      
       // DPR考慮で真の等倍表示を実現
       const dpr = window.devicePixelRatio || 1
       
       // 内部解像度をDPRに応じて高解像度化
-      canvas.width = clientWidth * dpr
-      canvas.height = clientHeight * dpr
+      canvas.width = actualWidth * dpr
+      canvas.height = actualHeight * dpr
       
-      // CSS表示サイズは元のまま
-      canvas.style.width = `${clientWidth}px`
-      canvas.style.height = `${clientHeight}px`
+      // CSS表示サイズを実際のサイズに設定
+      canvas.style.width = `${actualWidth}px`
+      canvas.style.height = `${actualHeight}px`
       
       // コンテキスト設定とDPR補正
       const context = canvas.getContext('2d')
@@ -114,7 +120,7 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
     return () => {
       resizeObserver.disconnect()
     }
-  }, [redrawAllStrokes, penColor, penSize, isDrawing])  // ペン設定も依存関係に追加
+  }, [redrawAllStrokes, penColor, penSize, isDrawing, imageSize])  // imageSize も依存関係に追加
 
   // 初期化時のストローク復元
   useEffect(() => {
@@ -124,6 +130,17 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
     // 初期化時にストロークを復元
     redrawAllStrokes(canvas)
   }, [redrawAllStrokes])
+
+  // スクロール位置同期
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    console.log('DrawingCanvas scroll sync:', scrollPosition)
+    // お手本側のスクロール位置に同期
+    container.scrollLeft = scrollPosition.x
+    container.scrollTop = scrollPosition.y
+  }, [scrollPosition])
 
   // お手本画像サイズ変更時の仮想キャンバス更新（緊急修正：無効化）
   // useEffect(() => {
@@ -147,11 +164,12 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
 
   const getMousePosition = useCallback((event: React.MouseEvent<HTMLCanvasElement>): DrawingPoint => {
     const canvas = canvasRef.current
-    if (!canvas) return { x: 0, y: 0 }
+    const container = containerRef.current
+    if (!canvas || !container) return { x: 0, y: 0 }
 
     const rect = canvas.getBoundingClientRect()
     
-    // 1:1スケールなので座標変換不要（直接座標使用）
+    // マウス位置からキャンバス内の相対座標を計算
     const canvasX = event.clientX - rect.left
     const canvasY = event.clientY - rect.top
     
@@ -213,7 +231,8 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
         style={{
           width: '100%',
           height: '100%',
-          position: 'relative'
+          position: 'relative',
+          overflow: 'auto'  // スクロール可能にする
         }}
       >
         <canvas
@@ -227,7 +246,8 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
           aria-label="描画キャンバス"
           style={{
             display: 'block',
-            imageRendering: 'pixelated'  // アンチエイリアス無効化
+            imageRendering: 'pixelated',  // アンチエイリアス無効化
+            backgroundColor: 'white'  // 背景を白に設定
           }}
         />
         {gridVisible && (
@@ -236,6 +256,7 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
             gridSize={gridSize}
             lineWidth={gridLineWidth}
             color={gridColor}
+            imageSize={imageSize}
           />
         )}
       </div>

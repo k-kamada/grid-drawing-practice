@@ -8,9 +8,11 @@ const defaultProps = {
   gridSize: 20,
   gridLineWidth: 1,
   gridColor: '#000000',
+  scrollPosition: { x: 0, y: 0 },
   onGridVisibleChange: vi.fn(),
   onGridSizeChange: vi.fn(),
   onImageDimensionsChange: vi.fn(),
+  onScrollChange: vi.fn(),
 }
 
 describe('ReferencePanel', () => {

@@ -10,6 +10,7 @@ interface DrawingPanelProps {
   gridLineWidth: number
   gridColor: string
   imageSize?: Size | null
+  scrollPosition: { x: number, y: number }
 }
 
 const DrawingPanel: React.FC<DrawingPanelProps> = ({
@@ -18,6 +19,7 @@ const DrawingPanel: React.FC<DrawingPanelProps> = ({
   gridLineWidth,
   gridColor,
   imageSize,
+  scrollPosition,
 }) => {
   const [penSize, setPenSize] = useState(1)
   const [penColor, setPenColor] = useState('#000000')
@@ -55,6 +57,7 @@ const DrawingPanel: React.FC<DrawingPanelProps> = ({
           gridLineWidth={gridLineWidth}
           gridColor={gridColor}
           imageSize={imageSize}
+          scrollPosition={scrollPosition}
           ref={canvasRef}
         />
       </div>
