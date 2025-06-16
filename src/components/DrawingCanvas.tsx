@@ -39,7 +39,8 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
     startStroke,
     addPointToStroke,
     finishStroke,
-    clearAllStrokes
+    clearAllStrokes,
+    redrawAllStrokes
   } = useDrawingStrokes()
 
   // 親コンポーネントに公開するメソッド
@@ -57,27 +58,69 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
     clearCanvas
   }), [clearCanvas]);
 
-  // コンテナサイズ監視と仮想キャンバス更新（緊急修正：簡素化）
+  // コンテナサイズ監視と動的キャンバスサイズ設定
   useEffect(() => {
     const canvas = canvasRef.current
     const container = containerRef.current
     if (!canvas || !container) return
 
-    // 固定サイズでキャンバスを初期化
-    canvas.width = 1200
-    canvas.height = 800
-  }, [])
+    const updateCanvasSize = () => {
+      if (isDrawing) return // 描画中はサイズ変更しない
+      
+      const { clientWidth, clientHeight } = container
+      
+      // DPR考慮で高解像度対応
+      const dpr = window.devicePixelRatio || 1
+      
+      // 内部解像度を表示サイズと同じに設定（スケール1:1）
+      canvas.width = clientWidth
+      canvas.height = clientHeight
+      
+      // CSS表示サイズも同じに設定
+      canvas.style.width = `${clientWidth}px`
+      canvas.style.height = `${clientHeight}px`
+      
+      // コンテキスト設定
+      const context = canvas.getContext('2d')
+      if (context) {
+        context.strokeStyle = penColor
+        context.lineWidth = penSize
+        context.lineCap = 'round'
+        context.lineJoin = 'round'
+        // アンチエイリアス無効化
+        context.imageSmoothingEnabled = false
+      }
+      
+      console.log('Canvas size updated:', { 
+        width: canvas.width, 
+        height: canvas.height, 
+        containerWidth: clientWidth, 
+        containerHeight: clientHeight,
+        dpr 
+      })
+      
+      redrawAllStrokes(canvas)
+    }
+    
+    // 初期サイズ設定
+    updateCanvasSize()
+    
+    const resizeObserver = new ResizeObserver(updateCanvasSize)
+    resizeObserver.observe(container)
 
-  // 仮想キャンバスサイズ変更時にストロークを再描画（緊急修正：無効化）
-  // useEffect(() => {
-  //   const canvas = canvasRef.current
-  //   if (!canvas) return
+    return () => {
+      resizeObserver.disconnect()
+    }
+  }, [redrawAllStrokes, penColor, penSize, isDrawing])  // ペン設定も依存関係に追加
 
-  //   // 描画中でなければストロークを再描画
-  //   if (!isDrawing) {
-  //     redrawAllStrokes(canvas)
-  //   }
-  // }, [virtualSize, isDrawing, redrawAllStrokes])
+  // 初期化時のストローク復元
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    // 初期化時にストロークを復元
+    redrawAllStrokes(canvas)
+  }, [redrawAllStrokes])
 
   // お手本画像サイズ変更時の仮想キャンバス更新（緊急修正：無効化）
   // useEffect(() => {
@@ -105,9 +148,9 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
 
     const rect = canvas.getBoundingClientRect()
     
-    // 固定サイズキャンバス座標系への変換
-    const canvasX = (event.clientX - rect.left) * (canvas.width / rect.width)
-    const canvasY = (event.clientY - rect.top) * (canvas.height / rect.height)
+    // 1:1スケールなので座標変換不要（直接座標使用）
+    const canvasX = event.clientX - rect.left
+    const canvasY = event.clientY - rect.top
     
     return {
       x: canvasX,
@@ -154,6 +197,7 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
     if (isDrawing) {
       finishStroke()
       setIsDrawing(false)
+      // 重いので削除: 描画完了時の再描画は不要
     }
   }, [isDrawing, finishStroke])
 
@@ -171,8 +215,6 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
       >
         <canvas
           ref={canvasRef}
-          width={1200}
-          height={800}
           className="drawing-canvas__canvas"
           onMouseDown={startDrawing}
           onMouseMove={draw}
@@ -182,8 +224,7 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
           aria-label="描画キャンバス"
           style={{
             display: 'block',
-            width: '100%',
-            height: '100%'
+            imageRendering: 'pixelated'  // アンチエイリアス無効化
           }}
         />
         {gridVisible && (
