@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback, forwardRef, useImperativeHandle } from 'react'
 import GridOverlay from './GridOverlay'
 import { useDrawingStrokes } from '../hooks/useDrawingStrokes'
-import { useVirtualCanvas } from '../hooks/useVirtualCanvas'
 import type { DrawingPoint, Size } from '../types/drawing'
 import './DrawingCanvas.css'
 
@@ -12,7 +11,7 @@ interface DrawingCanvasProps {
   gridSize: number
   gridLineWidth: number
   gridColor: string
-  imageSize?: Size | null // お手本画像サイズ（仮想キャンバスサイズ計算用）
+  imageSize?: Size | null // 未使用（緊急修正）
   onClear?: () => void
 }
 
@@ -28,32 +27,19 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
   gridSize,
   gridLineWidth,
   gridColor,
-  imageSize,
+  // imageSize, // 緊急修正：未使用
   onClear
 }, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
 
-  // 仮想キャンバス管理フック
-  const {
-    virtualSize,
-    needsScroll,
-    updateViewportSize,
-    updateImageSize
-  } = useVirtualCanvas({
-    imageSize,
-    defaultSize: { width: 1200, height: 800 },
-    minSize: { width: 800, height: 600 }
-  })
-
   // ストローク履歴管理フック
   const {
     startStroke,
     addPointToStroke,
     finishStroke,
-    clearAllStrokes,
-    redrawAllStrokes
+    clearAllStrokes
   } = useDrawingStrokes()
 
   // 親コンポーネントに公開するメソッド
@@ -71,43 +57,34 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
     clearCanvas
   }), [clearCanvas]);
 
-  // コンテナサイズ監視と仮想キャンバス更新
-  useEffect(() => {
-    const updateViewport = () => {
-      const container = containerRef.current
-      if (!container) return
-
-      const { clientWidth, clientHeight } = container
-      updateViewportSize({ width: clientWidth, height: clientHeight })
-    }
-
-    updateViewport()
-    
-    const resizeObserver = new ResizeObserver(updateViewport)
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current)
-    }
-
-    return () => {
-      resizeObserver.disconnect()
-    }
-  }, [updateViewportSize])
-
-  // 仮想キャンバスサイズ変更時にストロークを再描画
+  // コンテナサイズ監視と仮想キャンバス更新（緊急修正：簡素化）
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas) return
+    const container = containerRef.current
+    if (!canvas || !container) return
 
-    // 仮想キャンバスサイズ変更後に全ストロークを再描画
-    redrawAllStrokes(canvas)
-  }, [virtualSize, redrawAllStrokes])
+    // 固定サイズでキャンバスを初期化
+    canvas.width = 1200
+    canvas.height = 800
+  }, [])
 
-  // お手本画像サイズ変更時の仮想キャンバス更新
-  useEffect(() => {
-    if (imageSize) {
-      updateImageSize(imageSize)
-    }
-  }, [imageSize, updateImageSize])
+  // 仮想キャンバスサイズ変更時にストロークを再描画（緊急修正：無効化）
+  // useEffect(() => {
+  //   const canvas = canvasRef.current
+  //   if (!canvas) return
+
+  //   // 描画中でなければストロークを再描画
+  //   if (!isDrawing) {
+  //     redrawAllStrokes(canvas)
+  //   }
+  // }, [virtualSize, isDrawing, redrawAllStrokes])
+
+  // お手本画像サイズ変更時の仮想キャンバス更新（緊急修正：無効化）
+  // useEffect(() => {
+  //   if (imageSize) {
+  //     updateImageSize(imageSize)
+  //   }
+  // }, [imageSize, updateImageSize])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -128,16 +105,15 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
 
     const rect = canvas.getBoundingClientRect()
     
-    // 仮想キャンバス座標系への変換
-    // 表示座標 → 仮想キャンバス座標
-    const virtualX = (event.clientX - rect.left) * (virtualSize.width / rect.width)
-    const virtualY = (event.clientY - rect.top) * (virtualSize.height / rect.height)
+    // 固定サイズキャンバス座標系への変換
+    const canvasX = (event.clientX - rect.left) * (canvas.width / rect.width)
+    const canvasY = (event.clientY - rect.top) * (canvas.height / rect.height)
     
     return {
-      x: virtualX,
-      y: virtualY
+      x: canvasX,
+      y: canvasY
     }
-  }, [virtualSize])
+  }, [])
 
   const startDrawing = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
     const position = getMousePosition(event)
@@ -190,46 +166,34 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
         style={{
           width: '100%',
           height: '100%',
-          overflow: needsScroll ? 'auto' : 'hidden',
           position: 'relative'
         }}
       >
-        <div 
-          className="drawing-canvas__virtual-container"
+        <canvas
+          ref={canvasRef}
+          width={1200}
+          height={800}
+          className="drawing-canvas__canvas"
+          onMouseDown={startDrawing}
+          onMouseMove={draw}
+          onMouseUp={stopDrawing}
+          onMouseLeave={stopDrawing}
+          role="img"
+          aria-label="描画キャンバス"
           style={{
-            width: virtualSize.width,
-            height: virtualSize.height,
-            minWidth: virtualSize.width,
-            minHeight: virtualSize.height,
-            position: 'relative'
+            display: 'block',
+            width: '100%',
+            height: '100%'
           }}
-        >
-          <canvas
-            ref={canvasRef}
-            width={virtualSize.width}
-            height={virtualSize.height}
-            className="drawing-canvas__canvas"
-            onMouseDown={startDrawing}
-            onMouseMove={draw}
-            onMouseUp={stopDrawing}
-            onMouseLeave={stopDrawing}
-            role="img"
-            aria-label="描画キャンバス"
-            style={{
-              display: 'block',
-              width: virtualSize.width,
-              height: virtualSize.height
-            }}
+        />
+        {gridVisible && (
+          <GridOverlay
+            visible={gridVisible}
+            gridSize={gridSize}
+            lineWidth={gridLineWidth}
+            color={gridColor}
           />
-          {gridVisible && (
-            <GridOverlay
-              visible={gridVisible}
-              gridSize={gridSize}
-              lineWidth={gridLineWidth}
-              color={gridColor}
-            />
-          )}
-        </div>
+        )}
       </div>
     </div>
   )

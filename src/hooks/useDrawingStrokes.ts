@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import type { Stroke, DrawingPoint } from '../types/drawing'
 
 export const useDrawingStrokes = () => {
@@ -50,7 +50,13 @@ export const useDrawingStrokes = () => {
     setCurrentStroke(null)
   }, [])
 
-  // Canvas上で全ストロークを再描画
+  // refで最新のstrokesとcurrentStrokeを保持（安定した参照のため）
+  const strokesRef = useRef(strokes)
+  const currentStrokeRef = useRef(currentStroke)
+  strokesRef.current = strokes
+  currentStrokeRef.current = currentStroke
+
+  // Canvas上で全ストロークを再描画（安定した参照）
   const redrawAllStrokes = useCallback((canvas: HTMLCanvasElement) => {
     const context = canvas.getContext('2d')
     if (!context) return
@@ -59,7 +65,7 @@ export const useDrawingStrokes = () => {
     context.clearRect(0, 0, canvas.width, canvas.height)
 
     // 全ストロークを再描画
-    strokes.forEach(stroke => {
+    strokesRef.current.forEach(stroke => {
       if (stroke.points.length < 2) return
 
       context.strokeStyle = stroke.penColor
@@ -78,6 +84,7 @@ export const useDrawingStrokes = () => {
     })
 
     // 現在描画中のストロークも描画
+    const currentStroke = currentStrokeRef.current
     if (currentStroke && currentStroke.points.length >= 2) {
       context.strokeStyle = currentStroke.penColor
       context.lineWidth = currentStroke.penSize
@@ -93,7 +100,7 @@ export const useDrawingStrokes = () => {
       
       context.stroke()
     }
-  }, [strokes, currentStroke])
+  }, [])
 
   return {
     strokes,
