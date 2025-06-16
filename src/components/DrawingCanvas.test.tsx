@@ -258,25 +258,8 @@ describe('DrawingCanvas', () => {
     expect(overlayImage).not.toBeInTheDocument()
   })
 
-  it.skip('saves canvas as PNG when saveAsPNG is called through ref', () => {
+  it('saves canvas as PNG when saveAsPNG is called through ref', () => {
     let canvasRef: any = null
-    
-    // Mock Canvas toDataURL
-    const mockToDataURL = vi.fn(() => 'data:image/png;base64,mockdata')
-    
-    // Mock link element
-    const mockLink = document.createElement('a')
-    mockLink.click = vi.fn()
-    
-    const mockCreateElement = vi.fn(() => mockLink)
-    const mockAppendChild = vi.fn()
-    const mockRemoveChild = vi.fn()
-    
-    vi.spyOn(document, 'createElement').mockReturnValue(mockLink)
-    vi.spyOn(document.body, 'appendChild').mockImplementation(mockAppendChild)
-    vi.spyOn(document.body, 'removeChild').mockImplementation(mockRemoveChild)
-    
-    HTMLCanvasElement.prototype.toDataURL = mockToDataURL
     
     const TestComponent = () => (
       <DrawingCanvas 
@@ -287,15 +270,42 @@ describe('DrawingCanvas', () => {
     
     render(<TestComponent />)
     
+    // Mock Canvas toDataURL after render
+    const mockToDataURL = vi.fn(() => 'data:image/png;base64,mockdata')
+    HTMLCanvasElement.prototype.toDataURL = mockToDataURL
+    
+    // Mock link element with all required properties
+    const mockLink = {
+      download: '',
+      href: '',
+      click: vi.fn(),
+      style: {}
+    }
+    
+    // Mock document methods after render
+    const originalCreateElement = document.createElement
+    const originalAppendChild = document.body.appendChild
+    const originalRemoveChild = document.body.removeChild
+    
+    document.createElement = vi.fn(() => mockLink) as any
+    document.body.appendChild = vi.fn() as any
+    document.body.removeChild = vi.fn() as any
+    
     // Call saveAsPNG through ref
     canvasRef.saveAsPNG()
     
+    // Verify the mock was called correctly
     expect(mockToDataURL).toHaveBeenCalledWith('image/png')
-    expect(mockCreateElement).toHaveBeenCalledWith('a')
+    expect(document.createElement).toHaveBeenCalledWith('a')
     expect(mockLink.href).toBe('data:image/png;base64,mockdata')
     expect(mockLink.download).toMatch(/^drawing_\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.png$/)
-    expect(mockAppendChild).toHaveBeenCalledWith(mockLink)
+    expect(document.body.appendChild).toHaveBeenCalledWith(mockLink)
     expect(mockLink.click).toHaveBeenCalled()
-    expect(mockRemoveChild).toHaveBeenCalledWith(mockLink)
+    expect(document.body.removeChild).toHaveBeenCalledWith(mockLink)
+    
+    // Restore original methods
+    document.createElement = originalCreateElement
+    document.body.appendChild = originalAppendChild
+    document.body.removeChild = originalRemoveChild
   })
 })
