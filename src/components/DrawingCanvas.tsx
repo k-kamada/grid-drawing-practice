@@ -69,20 +69,23 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
       
       const { clientWidth, clientHeight } = container
       
-      // DPR考慮で高解像度対応
+      // DPR考慮で真の等倍表示を実現
       const dpr = window.devicePixelRatio || 1
       
-      // 内部解像度を表示サイズと同じに設定（スケール1:1）
-      canvas.width = clientWidth
-      canvas.height = clientHeight
+      // 内部解像度をDPRに応じて高解像度化
+      canvas.width = clientWidth * dpr
+      canvas.height = clientHeight * dpr
       
-      // CSS表示サイズも同じに設定
+      // CSS表示サイズは元のまま
       canvas.style.width = `${clientWidth}px`
       canvas.style.height = `${clientHeight}px`
       
-      // コンテキスト設定
+      // コンテキスト設定とDPR補正
       const context = canvas.getContext('2d')
       if (context) {
+        // DPRに応じてスケール調整（重要！）
+        context.scale(dpr, dpr)
+        
         context.strokeStyle = penColor
         context.lineWidth = penSize
         context.lineCap = 'round'
