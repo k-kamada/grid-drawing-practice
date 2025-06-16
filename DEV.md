@@ -586,3 +586,69 @@ style={{
 - ✅ プロ仕様UIによる本格的な描画環境提供
 - ✅ 拡張性の高い設計による将来機能への対応準備
 
+### PNG画像保存機能実装完了 (2025/6/17)
+
+#### 要件と設計方針
+**目的**: 練習記録として描画内容を保存可能にする
+- 素朴で実用的なアプローチ
+- ブラウザ標準機能を活用
+- サーバー連携なしの軽量実装
+
+#### 実装内容
+
+**保存機能の追加**
+- Canvas.toDataURL()を使用したPNG形式保存
+- 日時ベースの自動ファイル名生成: `drawing_YYYY-MM-DDTHH-mm-ss.png`
+- ブラウザダウンロード機能による保存
+
+**UI実装**
+- PenControlsパネルに保存ボタンを追加
+- 既存ボタン（重ね合わせ・クリア）との統一感あるデザイン
+- 緑色系の配色（#28a745 → #218838 hover）で識別しやすく配置
+
+**コンポーネント構造の拡張**
+```typescript
+// DrawingCanvasRef に saveAsPNG メソッド追加
+export interface DrawingCanvasRef {
+  clearCanvas: () => void
+  saveAsPNG: () => void
+}
+
+// 状態伝播: DrawingPanel → PenControls → DrawingCanvas
+```
+
+**実装技術詳細**
+```typescript
+// ファイル名生成
+const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19)
+const filename = `drawing_${timestamp}.png`
+
+// Canvas保存処理
+const dataURL = canvas.toDataURL('image/png')
+const link = document.createElement('a')
+link.download = filename
+link.href = dataURL
+link.click()
+```
+
+#### テスト対応
+**PenControlsテスト追加**
+- 保存ボタンの描画テスト
+- onSaveコールバックの呼び出しテスト
+
+**DrawingCanvasテスト追加**  
+- saveAsPNG機能のref公開テスト
+- Canvas.toDataURL()呼び出しテスト
+- ファイルダウンロード処理のモックテスト
+
+#### 期待効果
+- ✅ **練習記録保存**: 描画内容をPNG画像として保存可能
+- ✅ **ユーザビリティ向上**: ワンクリックでの簡単保存
+- ✅ **拡張基盤**: JSON保存・読み込み機能への対応準備
+
+#### 次期実装予定
+**Phase 2**: JSON形式によるストローク履歴保存・読み込み機能
+- ストロークデータのシリアライズ
+- ファイル読み込みによる描画復元
+- メタデータ（お手本画像情報、グリッド設定）の保存
+

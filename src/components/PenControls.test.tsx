@@ -10,6 +10,7 @@ describe('PenControls', () => {
     onPenSizeChange: vi.fn(),
     onPenColorChange: vi.fn(),
     onClear: vi.fn(),
+    onSave: vi.fn(),
   }
 
   it('renders pen size control', () => {
@@ -162,5 +163,24 @@ describe('PenControls', () => {
     const overlayButton = screen.getByRole('button', { name: /重ね合わせ/i })
     expect(overlayButton).toHaveTextContent('重ね合わせ ON')
     expect(overlayButton).toHaveClass('pen-controls__overlay-button--active')
+  })
+
+  it('renders save button', () => {
+    render(<PenControls {...defaultProps} />)
+    
+    const saveButton = screen.getByRole('button', { name: '保存' })
+    expect(saveButton).toBeInTheDocument()
+    expect(saveButton).toHaveClass('pen-controls__save-button')
+  })
+
+  it('calls onSave when save button is clicked', () => {
+    const mockOnSave = vi.fn()
+    
+    render(<PenControls {...defaultProps} onSave={mockOnSave} />)
+    
+    const saveButton = screen.getByRole('button', { name: '保存' })
+    fireEvent.click(saveButton)
+    
+    expect(mockOnSave).toHaveBeenCalledTimes(1)
   })
 })

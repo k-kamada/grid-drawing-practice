@@ -139,3 +139,21 @@
 .pen-controls__overlay-button--active {
   background-color: #4c4fff;
 }
+
+.pen-controls__save-button {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 10rem; /* 重ね合わせボタンの左側に配置 */
+  padding: 0.25rem 0.5rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.3s ease;
+}
+
+.pen-controls__save-button:hover {
+  background-color: #218838;
+}

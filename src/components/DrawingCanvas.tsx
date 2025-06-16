@@ -21,6 +21,7 @@ interface DrawingCanvasProps {
 // 親コンポーネントがアクセスできるメソッドの型定義
 export interface DrawingCanvasRef {
   clearCanvas: () => void
+  saveAsPNG: () => void
 }
 
 const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
@@ -60,9 +61,31 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
     onClear?.()
   }, [clearAllStrokes, onClear])
 
+  const saveAsPNG = useCallback(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    // 現在の日時でファイル名を生成
+    const now = new Date()
+    const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19)
+    const filename = `drawing_${timestamp}.png`
+
+    // Canvas内容をPNG形式のDataURLに変換
+    const dataURL = canvas.toDataURL('image/png')
+    
+    // ダウンロード用のリンクを作成して自動クリック
+    const link = document.createElement('a')
+    link.download = filename
+    link.href = dataURL
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }, [])
+
   useImperativeHandle(ref, () => ({
-    clearCanvas
-  }), [clearCanvas]);
+    clearCanvas,
+    saveAsPNG
+  }), [clearCanvas, saveAsPNG]);
 
   // コンテナサイズ監視と動的キャンバスサイズ設定
   useEffect(() => {

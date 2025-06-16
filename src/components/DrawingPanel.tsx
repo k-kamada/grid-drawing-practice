@@ -43,6 +43,10 @@ const DrawingPanel: React.FC<DrawingPanelProps> = ({
     canvasRef.current?.clearCanvas()
   }
 
+  const handleSave = () => {
+    canvasRef.current?.saveAsPNG()
+  }
+
   return (
     <div className="drawing-panel">
       <div className="drawing-panel__controls">
@@ -52,6 +56,7 @@ const DrawingPanel: React.FC<DrawingPanelProps> = ({
           onPenSizeChange={handlePenSizeChange}
           onPenColorChange={handlePenColorChange}
           onClear={handleClear}
+          onSave={handleSave}
           overlayVisible={overlayVisible}
           onOverlayToggle={onOverlayToggle}
         />

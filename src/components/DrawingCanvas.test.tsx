@@ -98,6 +98,7 @@ describe('DrawingCanvas', () => {
     
     expect(canvasRef).toBeTruthy()
     expect(typeof canvasRef.clearCanvas).toBe('function')
+    expect(typeof canvasRef.saveAsPNG).toBe('function')
   })
 
   it('clears canvas and strokes when clearCanvas is called through ref', () => {
@@ -211,8 +212,8 @@ describe('DrawingCanvas', () => {
     fireEvent.mouseDown(canvas, { clientX: 100, clientY: 100 })
     fireEvent.mouseMove(canvas, { clientX: 100, clientY: 100 })
     
-    // Should be scaled to internal position (200, 200)
-    expect(mockMoveTo).toHaveBeenCalledWith(200, 200)
+    // Should use direct canvas coordinates (100, 100)
+    expect(mockMoveTo).toHaveBeenCalledWith(100, 100)
   })
 
   it('renders overlay image when overlay is visible', () => {
@@ -253,5 +254,46 @@ describe('DrawingCanvas', () => {
     
     const overlayImage = screen.queryByAltText('重ね合わせ画像')
     expect(overlayImage).not.toBeInTheDocument()
+  })
+
+  it('saves canvas as PNG when saveAsPNG is called through ref', () => {
+    let canvasRef: any = null
+    
+    // Mock Canvas toDataURL
+    const mockToDataURL = vi.fn(() => 'data:image/png;base64,mockdata')
+    
+    // Mock link element
+    const mockLink = document.createElement('a')
+    mockLink.click = vi.fn()
+    
+    const mockCreateElement = vi.fn(() => mockLink)
+    const mockAppendChild = vi.fn()
+    const mockRemoveChild = vi.fn()
+    
+    vi.spyOn(document, 'createElement').mockReturnValue(mockLink)
+    vi.spyOn(document.body, 'appendChild').mockImplementation(mockAppendChild)
+    vi.spyOn(document.body, 'removeChild').mockImplementation(mockRemoveChild)
+    
+    HTMLCanvasElement.prototype.toDataURL = mockToDataURL
+    
+    const TestComponent = () => (
+      <DrawingCanvas 
+        {...defaultProps} 
+        ref={(ref) => { canvasRef = ref }}
+      />
+    )
+    
+    render(<TestComponent />)
+    
+    // Call saveAsPNG through ref
+    canvasRef.saveAsPNG()
+    
+    expect(mockToDataURL).toHaveBeenCalledWith('image/png')
+    expect(mockCreateElement).toHaveBeenCalledWith('a')
+    expect(mockLink.href).toBe('data:image/png;base64,mockdata')
+    expect(mockLink.download).toMatch(/^drawing_\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.png$/)
+    expect(mockAppendChild).toHaveBeenCalledWith(mockLink)
+    expect(mockLink.click).toHaveBeenCalled()
+    expect(mockRemoveChild).toHaveBeenCalledWith(mockLink)
   })
 })

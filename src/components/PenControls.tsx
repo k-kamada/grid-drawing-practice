@@ -7,6 +7,7 @@ interface PenControlsProps {
   onPenSizeChange: (size: number) => void
   onPenColorChange: (color: string) => void
   onClear: () => void
+  onSave: () => void
   overlayVisible?: boolean
   onOverlayToggle?: (visible: boolean) => void
 }
@@ -17,6 +18,7 @@ const PenControls: React.FC<PenControlsProps> = ({
   onPenSizeChange,
   onPenColorChange,
   onClear,
+  onSave,
   overlayVisible = false,
   onOverlayToggle
 }) => {
@@ -110,6 +112,14 @@ const PenControls: React.FC<PenControlsProps> = ({
           重ね合わせ {overlayVisible ? 'ON' : 'OFF'}
         </button>
       )}
+      
+      <button
+        type="button"
+        onClick={onSave}
+        className="pen-controls__save-button"
+      >
+        保存
+      </button>
       
       <button
         type="button"
